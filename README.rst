@@ -25,10 +25,14 @@ Currently there is only one such class: ``I2CPCF8574Interface``.
 
     from lcd.lcd import CursorMode
 
+    import busio
+    import board
+
     # Talk to the LCD at I2C address 0x27.
-    # The number of rows and columns defaults to 4x20, so those
-    # arguments could be omitted in this case.
-    lcd = LCD(I2CPCF8574Interface(0x27), num_rows=4, num_cols=20)
+    comm_port = busio.I2C(board.SCL, board.SDA)
+    i2c_address = 0x27
+    interface = I2CPCF8574Interface(comm_port, i2c_address)
+    lcd = LCD(interface, num_cols=20, num_rows=4)
 
     lcd.print("abc ")
     lcd.print("This is quite long and will wrap onto the next line automatically.")
