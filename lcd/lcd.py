@@ -59,19 +59,6 @@ _LCD_1LINE = const(0x00)
 _LCD_5x10DOTS = const(0x04)
 _LCD_5x8DOTS = const(0x00)
 
-# Flags for backlight control
-LCD_BACKLIGHT = const(0x08)
-LCD_NOBACKLIGHT = const(0x00)
-
-# Flags for RS pin modes
-_RS_INSTRUCTION = const(0x00)
-_RS_DATA = const(0x01)
-
-# Pin bitmasks
-PIN_ENABLE = const(0x4)
-PIN_READ_WRITE = const(0x2)
-PIN_REGISTER_SELECT = const(0x1)
-
 class CursorMode:
     HIDE = const(_LCD_CURSOROFF | _LCD_BLINKOFF)
     LINE = const(_LCD_CURSORON | _LCD_BLINKOFF)
@@ -265,18 +252,18 @@ class LCD(object):
         # Write character to CGRAM
         self.command(_LCD_SETCGRAMADDR | location << 3)
         for row in bitmap:
-            self.interface.send(row, _RS_DATA)
+            self.interface.send_data(row)
 
         # Restore cursor pos
         self.set_cursor_pos(save_row, save_col)
 
     def command(self, value):
         """Send a raw command to the LCD."""
-        self.interface.send(value, _RS_INSTRUCTION)
+        self.interface.send_instruction(value)
 
     def write(self, value):
         """Write a raw character byte to the LCD."""
-        self.interface.send(value, _RS_DATA)
+        self.interface.send_data(value)
         if self._col < self.num_cols - 1:
             # Char was placed on current line. No need to reposition cursor.
             self._col += 1

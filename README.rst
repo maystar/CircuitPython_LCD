@@ -21,17 +21,18 @@ Currently there is only one such class: ``I2CPCF8574Interface``.
 .. code-block:: python
 
     from lcd.lcd import LCD
-    from lcd.i2c_pcf8574_interface import I2CPCF8574Interface
+    from lcd.i2c_pcf8574_interface import I2CPCF8574Interface,PinMapping
 
     from lcd.lcd import CursorMode
 
     import busio
     import board
 
-    # Talk to the LCD at I2C address 0x27.
     comm_port = busio.I2C(board.SCL, board.SDA)
-    i2c_address = 0x27
-    interface = I2CPCF8574Interface(comm_port, i2c_address)
+
+    # Talk to the LCD at I2C address 0x27.
+    interface = I2CPCF8574Interface(comm_port, 0x27, PinMapping.MAPPING2)
+
     lcd = LCD(interface, num_cols=20, num_rows=4)
 
     lcd.print("abc ")
