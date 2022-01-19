@@ -183,7 +183,13 @@ class LCD(object):
                 # Advance to next row, at left side. Wrap around to top row if at bottom.
                 self.set_cursor_pos((self._row + 1) % self.num_rows, 0)
             else:
-                self.write(ord(char))
+                code = 0xE1 if char == "ä" or char == "Ä" \
+                        else 0xF5 if char == "ü" or char == "Ü" \
+                        else 0xEF if char == "ö" or char == "Ö" \
+                        else 0xE2 if char == "ß" \
+                        else ord(char)
+
+                self.write(code)
 
 
     def clear(self):
