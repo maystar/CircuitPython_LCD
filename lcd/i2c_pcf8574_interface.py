@@ -22,23 +22,12 @@
 
 import microcontroller
 from adafruit_bus_device.i2c_device import I2CDevice
+from .pin_mapping import PinMapping
 
 from micropython import const
-from enum import Enum
 
-class PinMapping(Enum):
-    """
-    Supports two variants of pin mappings:
-    |           | 7    | 6    | 5    | 4    | 3    | 2    | 1    | 0    |
-    | --------  | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
-    | Variant 1 | D7   | D6   | D5   | D4   | BL   | EN   | RW   | RS   |
-    | Variant 2 | EN   | X    | X    | RS   | D7   | D6   | D5   | D4   |
-    """
-    MAPPING1 = 1
-    MAPPING2 = 2
 
 class I2CPCF8574Interface:
-
     class Pins:
         def __init__(self, en: int, rs: int, bl: int = const(0x00)):
             self.en = en
@@ -46,8 +35,8 @@ class I2CPCF8574Interface:
             self.bl = bl
 
     _pins_of_mappings = {
-        PinMapping.MAPPING1:  Pins(const(0x04), const(0x01), const(0x08)),
-        PinMapping.MAPPING2:  Pins(const(0x80), const(0x10)),
+        PinMapping.MAPPING1: Pins(const(0x04), const(0x01), const(0x08)),
+        PinMapping.MAPPING2: Pins(const(0x80), const(0x10)),
     }
 
     def __init__(self, i2c, address, pin_mapping=PinMapping.MAPPING1):
@@ -71,7 +60,7 @@ class I2CPCF8574Interface:
 
     @property
     def data_bus_mode(self):
-        return const(0x00) #LCD_4BITMODE
+        return const(0x00)  # LCD_4BITMODE
 
     @property
     def backlight(self):
