@@ -1,5 +1,8 @@
 *.mpy
 *~
 /.idea/
-
-
+/dist/
+/.mypy_cache/
+/.pytest_cache/
+/.tox/
+/*.egg-info
