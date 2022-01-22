@@ -22,9 +22,9 @@
 
 import microcontroller
 from adafruit_bus_device.i2c_device import I2CDevice
-from .pin_mapping import PinMapping
-
 from micropython import const
+
+from .pin_mapping import PinMapping
 
 
 class I2CPCF8574Interface:

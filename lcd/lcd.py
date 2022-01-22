@@ -19,6 +19,7 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import time
+
 from micropython import const
 
 # Commands
@@ -59,13 +60,16 @@ _LCD_1LINE = const(0x00)
 _LCD_5x10DOTS = const(0x04)
 _LCD_5x8DOTS = const(0x00)
 
+
 class CursorMode:
     HIDE = const(_LCD_CURSOROFF | _LCD_BLINKOFF)
     LINE = const(_LCD_CURSORON | _LCD_BLINKOFF)
     BLINK = const(_LCD_CURSOROFF | _LCD_BLINKON)
 
+
 MICROSECOND = 1e-6
 MILLISECOND = 1e-3
+
 
 class LCD(object):
 
@@ -80,17 +84,17 @@ class LCD(object):
                 Allowed: 8 or 10. Default: 8.
         """
         self.interface = interface
-        
+
         if char_height not in (8, 10):
             raise ValueError('The ``char_height`` argument should be either 8 or 10.')
         self.char_height = char_height
 
         self.num_rows = num_rows
         self.num_cols = num_cols
-        
+
         # get row addresses (varies based on display size)
         self._row_offsets = (0x00, 0x40, self.num_cols, 0x40 + self.num_cols)
- 
+
         # Setup initial display configuration
         displayfunction = self.interface.data_bus_mode | _LCD_5x8DOTS
         if self.num_rows == 1:
@@ -104,37 +108,37 @@ class LCD(object):
 
         # Choose 4 or 8 bit mode
         self.command(0x03)
-        time.sleep(4.5*MILLISECOND)
+        time.sleep(4.5 * MILLISECOND)
         self.command(0x03)
-        time.sleep(4.5*MILLISECOND)
+        time.sleep(4.5 * MILLISECOND)
         self.command(0x03)
         if self.interface.data_bus_mode == LCD_4BITMODE:
             # Hitachi manual page 46
-            time.sleep(100*MICROSECOND)
+            time.sleep(100 * MICROSECOND)
             self.command(0x02)
         elif self.interface.data_bus_mode == _LCD_8BITMODE:
             # Hitachi manual page 45
             self.command(0x30)
-            time.sleep(4.5*MILLISECOND)
+            time.sleep(4.5 * MILLISECOND)
             self.command(0x30)
-            time.sleep(100*MICROSECOND)
+            time.sleep(100 * MICROSECOND)
             self.command(0x30)
         else:
             raise ValueError('Invalid data bus mode: {}'.format(self.interface.data_bus_mode))
 
         # Write configuration to display
         self.command(_LCD_FUNCTIONSET | displayfunction)
-        time.sleep(50*MICROSECOND)
+        time.sleep(50 * MICROSECOND)
 
         # Configure entry mode. Define internal fields.
         self.command(_LCD_ENTRYMODESET | _LCD_ENTRYLEFT)
-        time.sleep(50*MICROSECOND)
+        time.sleep(50 * MICROSECOND)
 
         # Configure display mode. Define internal fields.
         self._display_mode = _LCD_DISPLAYON
         self._cursor_mode = CursorMode.HIDE
         self.command(_LCD_DISPLAYCONTROL | self._display_mode | self._cursor_mode)
-        time.sleep(50*MICROSECOND)
+        time.sleep(50 * MICROSECOND)
 
         self.clear()
 
@@ -147,12 +151,12 @@ class LCD(object):
     def set_display_enabled(self, value):
         self._display_mode = _LCD_DISPLAYON if value else _LCD_DISPLAYOFF
         self.command(_LCD_DISPLAYCONTROL | self._display_mode | self._cursor_mode)
-        time.sleep(50*MICROSECOND)
+        time.sleep(50 * MICROSECOND)
 
     def set_cursor_mode(self, value):
         self._cursor_mode = value
         self.command(_LCD_DISPLAYCONTROL | self._display_mode | self._cursor_mode)
-        time.sleep(50*MICROSECOND)
+        time.sleep(50 * MICROSECOND)
 
     def cursor_pos(self):
         """The cursor position as a 2-tuple (row, col)."""
@@ -166,7 +170,7 @@ class LCD(object):
         self._row = row
         self._col = col
         self.command(_LCD_SETDDRAMADDR | self._row_offsets[row] + col)
-        time.sleep(50*MICROSECOND)
+        time.sleep(50 * MICROSECOND)
 
     def print(self, string):
         """
@@ -184,18 +188,17 @@ class LCD(object):
                 self.set_cursor_pos((self._row + 1) % self.num_rows, 0)
             else:
                 code = 0xE1 if char == "ä" or char == "Ä" \
-                        else 0xF5 if char == "ü" or char == "Ü" \
-                        else 0xEF if char == "ö" or char == "Ö" \
-                        else 0xE2 if char == "ß" \
-                        else ord(char)
+                    else 0xF5 if char == "ü" or char == "Ü" \
+                    else 0xEF if char == "ö" or char == "Ö" \
+                    else 0xE2 if char == "ß" \
+                    else ord(char)
 
                 self.write(code)
-
 
     def clear(self):
         """Overwrite display with blank characters and reset cursor position."""
         self.command(_LCD_CLEARDISPLAY)
-        time.sleep(2*MILLISECOND)
+        time.sleep(2 * MILLISECOND)
         self.home()
 
     def home(self):
@@ -203,7 +206,7 @@ class LCD(object):
         self.command(_LCD_RETURNHOME)
         self._row = 0
         self._col = 0
-        time.sleep(2*MILLISECOND)
+        time.sleep(2 * MILLISECOND)
 
     def shift_display(self, amount):
         """Shift the display. Use negative amounts to shift left and positive
@@ -213,7 +216,7 @@ class LCD(object):
         direction = _LCD_MOVERIGHT if amount > 0 else _LCD_MOVELEFT
         for i in range(abs(amount)):
             self.command(_LCD_CURSORSHIFT | _LCD_DISPLAYMOVE | direction)
-            time.sleep(50*MICROSECOND)
+            time.sleep(50 * MICROSECOND)
 
     def create_char(self, location, bitmap):
         """Create a new character.
@@ -279,4 +282,3 @@ class LCD(object):
             self._col = 0
 
         self.set_cursor_pos(self._row, self._col)
-
